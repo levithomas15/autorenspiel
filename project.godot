@@ -1,0 +1,41 @@
+; Engine configuration file.
+; Godot 4.4+ - Autorennspiel
+
+config_version=5
+
+[application]
+
+config/name="Autorennspiel"
+config/description="Ein prozedural erzeugtes Rennspiel mit vier Fahrzeugen."
+run/main_scene="res://scenes/Main.tscn"
+config/features=PackedStringArray("4.4", "Forward Plus")
+config/icon="res://icon.svg"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/size/mode=3
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[physics]
+
+3d/default_gravity=12.0
+common/physics_ticks_per_second=120
+
+[rendering]
+
+renderer/rendering_method="forward_plus"
+textures/default_filters/anisotropic_filtering_level=3
+lights_and_shadows/directional_shadow/size=8192
+lights_and_shadows/directional_shadow/soft_shadow_filter_quality=3
+anti_aliasing/quality/msaa_3d=2
+anti_aliasing/quality/screen_space_aa=0
+anti_aliasing/quality/use_taa=true
+environment/ssao/quality=3
+environment/ssil/quality=2
+environment/screen_space_reflection/roughness_quality=2
+environment/subsurface_scattering/subsurface_scattering_quality=2
+global_illumination/sdfgi/probe_ray_count=3
+global_illumination/sdfgi/frames_to_converge=3
