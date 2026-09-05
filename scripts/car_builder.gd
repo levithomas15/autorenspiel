@@ -106,7 +106,7 @@ static func _add_interior(root: Node3D, spec: Dictionary) -> void:
 	MeshLib.add_box(st, Vector3(0, 0.55, (z_front + z_rear) * 0.5),
 		Vector3(0.28, 0.26, z_rear - z_front))
 	# Zwei Schalensitze
-	for s in [-1.0, 1.0]:
+	for s: float in [-1.0, 1.0]:
 		var seat_z: float = z_front + (z_rear - z_front) * 0.55
 		MeshLib.add_box(st, Vector3(s * 0.36, 0.60, seat_z), Vector3(0.50, 0.14, 0.52))
 		MeshLib.add_box(st, Vector3(s * 0.36, 0.86, seat_z + 0.30), Vector3(0.50, 0.56, 0.14))
@@ -127,7 +127,7 @@ static func _add_interior(root: Node3D, spec: Dictionary) -> void:
 	if spec["wing"] == "gt":
 		var cage := MeshLib.new_surface()
 		var top_y: float = MeshLib.sample_curve(spec["body"], cabin[1] - 0.06, 3) - 0.10
-		for s in [-1.0, 1.0]:
+		for s: float in [-1.0, 1.0]:
 			var bar := PackedVector3Array()
 			bar.append(Vector3(s * 0.62, 0.45, z_rear - 0.10))
 			bar.append(Vector3(s * 0.60, top_y * 0.7, z_rear - 0.14))
@@ -172,11 +172,11 @@ static func _add_fenders(root: Node3D, spec: Dictionary, paint: Material) -> voi
 	var st := MeshLib.new_surface()
 	var liner := MeshLib.new_surface()
 	var th: float = spec["track_half"]
-	for axle in ["front", "rear"]:
+	for axle: String in ["front", "rear"]:
 		var z: float = spec["front_axle_z"] if axle == "front" else spec["rear_axle_z"]
 		var r: float = spec["wheel_radius_front"] if axle == "front" else spec["wheel_radius_rear"]
 		var w: float = spec["tire_width_front"] if axle == "front" else spec["tire_width_rear"]
-		for s in [-1.0, 1.0]:
+		for s: float in [-1.0, 1.0]:
 			var c := Vector3(s * th, r, z)
 			# Aufgesetzte Kotfluegelverbreiterung
 			MeshLib.add_torus_arc_x(st, c, r * 1.24, 0.055, PI * 0.06, PI * 0.94, 22, 10)
@@ -207,7 +207,7 @@ static func _add_aero(root: Node3D, spec: Dictionary, carbon: Material) -> void:
 	MeshLib.add_hull_box(st, sp)
 
 	# Seitenschweller
-	for s in [-1.0, 1.0]:
+	for s: float in [-1.0, 1.0]:
 		var sk := PackedVector3Array()
 		var zf: float = spec["front_axle_z"] + 0.42
 		var zr: float = spec["rear_axle_z"] - 0.42
@@ -263,7 +263,7 @@ static func _add_wing(root: Node3D, spec: Dictionary, carbon: Material,
 			blade.append(Vector3(-span, wing_y - 0.055, wing_z + chord * 0.5))
 			MeshLib.add_hull_box(st, blade)
 			# Endplatten
-			for s in [-1.0, 1.0]:
+			for s: float in [-1.0, 1.0]:
 				var ep := PackedVector3Array()
 				ep.append(Vector3(s * span, wing_y - 0.18, wing_z - chord * 0.85))
 				ep.append(Vector3(s * span, wing_y - 0.18, wing_z + chord * 0.85))
@@ -273,7 +273,7 @@ static func _add_wing(root: Node3D, spec: Dictionary, carbon: Material,
 					ep.append(ep[i] + Vector3(0, 0.30, 0))
 				MeshLib.add_hull_box(st, ep)
 			# Schwanenhals-Streben von unten an das Blatt
-			for s in [-1.0, 1.0]:
+			for s: float in [-1.0, 1.0]:
 				var path := PackedVector3Array()
 				path.append(Vector3(s * span * 0.52, deck_y - 0.06, wing_z + 0.24))
 				path.append(Vector3(s * span * 0.52, (deck_y + wing_y) * 0.5, wing_z + 0.16))
@@ -327,12 +327,12 @@ static func _add_lights(root: Node3D, spec: Dictionary) -> void:
 	var head := MeshLib.new_surface()
 	if spec["headlight"] == "round":
 		# Runde Hauptscheinwerfer - das Markenzeichen dieser Karosserieform.
-		for s in [-1.0, 1.0]:
+		for s: float in [-1.0, 1.0]:
 			var c := Vector3(s * w_front * 0.74, y_front, z_front + 0.34)
 			_add_disc_z(head, c, 0.0, 0.145, 24)
 			_add_disc_z(head, c + Vector3(0, 0, -0.02), 0.0, 0.115, 24)
 	else:
-		for s in [-1.0, 1.0]:
+		for s: float in [-1.0, 1.0]:
 			var lamp := PackedVector3Array()
 			var x0: float = s * w_front * 0.34
 			var x1: float = s * w_front * 0.93
@@ -349,7 +349,7 @@ static func _add_lights(root: Node3D, spec: Dictionary) -> void:
 	var lamps := Node3D.new()
 	lamps.name = "HeadlightBeams"
 	lamps.visible = false
-	for s in [-1.0, 1.0]:
+	for s: float in [-1.0, 1.0]:
 		var spot := SpotLight3D.new()
 		spot.position = Vector3(s * w_front * 0.72, y_front, z_front + 0.30)
 		spot.rotation = Vector3(-0.06, PI, 0)
@@ -403,12 +403,12 @@ static func _add_details(root: Node3D, spec: Dictionary, accent: Material,
 	# Frontgrill und zwei aeussere Einlaesse
 	var w_front: float = MeshLib.sample_curve(spec["body"], 0.08, 1)
 	MeshLib.add_box(dark, Vector3(0, 0.30, z_front + 0.16), Vector3(w_front * 0.85, 0.16, 0.22))
-	for s in [-1.0, 1.0]:
+	for s: float in [-1.0, 1.0]:
 		MeshLib.add_box(dark, Vector3(s * w_front * 0.66, 0.42, z_front + 0.20),
 			Vector3(0.34, 0.14, 0.20))
 	# Seitliche Einlaesse vor den Hinterraedern
 	var w_side: float = MeshLib.sample_curve(spec["body"], 0.70, 1)
-	for s in [-1.0, 1.0]:
+	for s: float in [-1.0, 1.0]:
 		MeshLib.add_box(dark, Vector3(s * w_side * 0.99, 0.62, spec["rear_axle_z"] - 0.62),
 			Vector3(0.08, 0.22, 0.50))
 	# Heckabschluss / Motorgitter
@@ -423,7 +423,7 @@ static func _add_details(root: Node3D, spec: Dictionary, accent: Material,
 	var w_mirror: float = MeshLib.sample_curve(spec["body"], t_mirror, 1)
 	var y_mirror: float = MeshLib.sample_curve(spec["body"], t_mirror, 3) - 0.16
 	var z_mirror: float = (t_mirror - 0.5) * length
-	for s in [-1.0, 1.0]:
+	for s: float in [-1.0, 1.0]:
 		var stalk := PackedVector3Array()
 		stalk.append(Vector3(s * w_mirror * 0.92, y_mirror - 0.02, z_mirror))
 		stalk.append(Vector3(s * (w_mirror + 0.16), y_mirror + 0.06, z_mirror - 0.03))

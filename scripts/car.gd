@@ -78,12 +78,12 @@ func _build_collision() -> void:
 func _build_wheels() -> void:
 	var th: float = spec["track_half"]
 	var drive: String = spec["drive"]
-	for axle in ["front", "rear"]:
+	for axle: String in ["front", "rear"]:
 		var is_front := axle == "front"
 		var z: float = spec["front_axle_z"] if is_front else spec["rear_axle_z"]
 		var radius: float = spec["wheel_radius_front"] if is_front else spec["wheel_radius_rear"]
 		var width: float = spec["tire_width_front"] if is_front else spec["tire_width_rear"]
-		for s in [-1.0, 1.0]:
+		for s: float in [-1.0, 1.0]:
 			var wheel := VehicleWheel3D.new()
 			wheel.name = "Wheel%s%s" % [axle.capitalize(), "R" if s > 0.0 else "L"]
 			# Der Knoten sitzt am Federbeinpunkt, also um die Federlaenge

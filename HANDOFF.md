@@ -22,25 +22,52 @@ Branches: `main` und `claude/godot-racing-game-cars-max3ea` — identischer Stan
 
 ## Status
 
-**Vollständig gebaut und gepusht. Noch nie ausgeführt.**
+**Gebaut und erstmals ausgeführt** — mit Godot 4.4.1 headless, alle vier
+Fahrzeuge fahren.
 
-Godot war in der Bau-Umgebung nicht installiert, ein Testlauf war deshalb
-unmöglich. Geprüft wurde stattdessen:
+Beim ersten echten Start fielen drei Parse-Fehler auf, die das Spiel komplett
+am Laden hinderten (`car.gd:82`, `garage.gd:126`, `track.gd:255`): Schleifen
+über Array-Literale wie `for s in [-1.0, 1.0]` liefern eine `Variant`-Variable,
+und aus einer `Variant` kann `:=` keinen Typ ableiten. Behoben durch explizite
+Schleifentypen (`for s: float in [...]`, `for axle: String in [...]`).
 
-- jede Datei statisch gegen die Godot-4.4-API (Klassen, Properties, Enums)
-- alle klassenübergreifenden Aufrufe lösen auf (Prüfskript)
-- alle 29 Fahrzeug-Schlüssel in allen vier Definitionen vorhanden
-- keine fehlenden `res://`-Pfade, Klammern ausgeglichen, nur Tab-Einrückung
+Danach läuft es durch: Strecke 2287 m, Garage und Rennen bauen sich fehlerfrei
+auf, alle vier Autos beschleunigen und bleiben auf der Fahrbahn.
 
-Der erste `F5`-Start ist also der eigentliche Test.
+Was noch aussteht: **kein Test mit Bild.** Geprüft ist Logik, Physik und
+Streckengeometrie — nicht, wie das Ganze tatsächlich aussieht. Beleuchtung,
+Materialien, Kameraführung und HUD-Layout beurteilt erst der erste `F5`-Start
+mit Fenster.
+
+### Rauchtest
+
+```
+godot --headless --path . --script res://tools/smoke_test.gd
+```
+
+Fährt jedes Fahrzeug rund zehn Sekunden mit Vollgas und meldet Tempo, Gang und
+Streckenlage. Skriptfehler tauchen dabei in der Ausgabe auf. Lohnt sich nach
+jeder Änderung an Physik, Strecke oder Fahrzeugdaten — es ist deutlich
+schneller als das Spiel von Hand zu starten.
+
+### Beobachtung zur Abstimmung
+
+Aus dem Stand über 6,8 Sekunden Vollgas erreichen die drei Verbrenner nur
+64–68 km/h, der allradgetriebene Aurora EV dagegen 133 km/h. Das ist kein
+Fehler — die Heck- und Frontantriebe verlieren Traktion, während der Allradler
+seine Leistung auf vier Räder verteilt. Der Unterschied ist aber größer als er
+sein sollte; für einen GT3 RS ist das zu zäh. Ansatzpunkte, falls du das
+angehen willst: `power` und `mass` in `scripts/car_data.gd`, sowie
+`_base_friction` und der Drehmomentverlauf in `scripts/car.gd:182`.
 
 ## Erste Schritte in einer neuen Session
 
 Wenn beim Start Fehler auftreten, sind das die wahrscheinlichsten Stellen —
 in dieser Reihenfolge prüfen:
 
-1. **Godot-Version.** Alles ist gegen 4.4 geschrieben. Bei 4.2/4.3 können
-   einzelne Environment-Properties fehlen (`ssil_*`, `volumetric_fog_*`).
+1. **Godot-Version.** Alles ist gegen 4.4 geschrieben und mit 4.4.1 getestet.
+   Bei 4.2/4.3 können einzelne Environment-Properties fehlen (`ssil_*`,
+   `volumetric_fog_*`).
 2. **Fahrzeug sinkt ein oder hüpft.** `scripts/car.gd`, `_build_wheels()`:
    `suspension_stiffness`, `suspension_travel`, `wheel_rest_length` und die
    Höhe der Kollisionsboxen in `_build_collision()` hängen zusammen. Der
@@ -73,6 +100,7 @@ in dieser Reihenfolge prüfen:
 | `scripts/hud.gd` | Tacho, Drehzahlbogen, Rundenzeiten |
 | `scripts/garage.gd` | Auswahl auf dem Drehteller |
 | `scripts/engine_audio.gd` | Motorsound aus Grundton + Harmonischen |
+| `tools/smoke_test.gd` | Rauchtest ohne Fenster (siehe oben) |
 
 ## Bewusst nicht gebaut
 

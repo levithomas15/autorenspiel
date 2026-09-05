@@ -122,12 +122,12 @@ static func build_showcase(spec: Dictionary) -> Node3D:
 	root.name = "Showcase"
 	root.add_child(CarBuilder.build(spec))
 	var th: float = spec["track_half"]
-	for axle in ["front", "rear"]:
+	for axle: String in ["front", "rear"]:
 		var is_front := axle == "front"
 		var z: float = spec["front_axle_z"] if is_front else spec["rear_axle_z"]
 		var radius: float = spec["wheel_radius_front"] if is_front else spec["wheel_radius_rear"]
 		var width: float = spec["tire_width_front"] if is_front else spec["tire_width_rear"]
-		for s in [-1.0, 1.0]:
+		for s: float in [-1.0, 1.0]:
 			var wheel := WheelBuilder.build(radius, width, s, spec["rim_color"],
 				spec["rim_style"], spec["rim_spokes"])
 			wheel.position = Vector3(s * th, radius, z)

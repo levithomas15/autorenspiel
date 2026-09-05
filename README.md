@@ -16,6 +16,15 @@ deshalb nur aus Text und lässt sich vollständig lesen und verändern.
 
 Beim ersten Start wird die Strecke erzeugt; das dauert einen Moment.
 
+Ob alles läuft, lässt sich auch ohne Fenster prüfen:
+
+```
+godot --headless --path . --script res://tools/smoke_test.gd
+```
+
+Das fährt jedes der vier Fahrzeuge kurz mit Vollgas und meldet Tempo, Gang und
+Streckenlage — praktisch nach Änderungen an Physik, Strecke oder Fahrzeugdaten.
+
 ## Steuerung
 
 | Aktion | Tastatur | Gamepad |
@@ -62,6 +71,7 @@ scripts/world_env.gd  Beleuchtung und Post-Processing
 scripts/chase_camera.gd  Vier Kameraperspektiven
 scripts/hud.gd        Tacho, Drehzahlbogen, Rundenzeiten
 scripts/engine_audio.gd  Motorsound aus Grundton und Harmonischen
+tools/smoke_test.gd   Rauchtest ohne Fenster
 ```
 
 ## Eigene Anpassungen
