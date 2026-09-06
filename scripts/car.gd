@@ -28,6 +28,11 @@ var max_rpm: float = 8800.0
 ## Grundgriff der Reifen. Pro Fahrzeug einstellbar, weil sehr viel Leistung
 ## sonst nur die Raeder durchdrehen laesst.
 var _base_friction: float = 3.2
+
+## Wird der Wagen von aussen gefahren (Autopilot), kommen Gas, Bremse und
+## Lenkung nicht mehr von der Tastatur, sondern hier herein.
+var external_control: bool = false
+var external_input: Vector3 = Vector3.ZERO
 var _wheels: Array[VehicleWheel3D] = []
 var _tail_material: StandardMaterial3D = null
 var _beams: Node3D = null
@@ -149,10 +154,16 @@ func _physics_process(delta: float) -> void:
 	var speed := linear_velocity.length()
 	speed_kmh = speed * 3.6
 
-	throttle_input = Input.get_action_strength("throttle")
-	brake_input = Input.get_action_strength("brake")
-	var steer_input := Input.get_action_strength("steer_left") \
-		- Input.get_action_strength("steer_right")
+	var steer_input: float
+	if external_control:
+		throttle_input = external_input.x
+		brake_input = external_input.y
+		steer_input = external_input.z
+	else:
+		throttle_input = Input.get_action_strength("throttle")
+		brake_input = Input.get_action_strength("brake")
+		steer_input = Input.get_action_strength("steer_left") \
+			- Input.get_action_strength("steer_right")
 
 	_update_steering(steer_input, delta)
 	_update_drivetrain(speed)
@@ -192,7 +203,7 @@ func _update_drivetrain(speed: float) -> void:
 	var rev := rpm / max_rpm
 	var torque: float = 0.55 + 0.75 * sin(clampf(rev, 0.0, 1.0) * PI * 0.92)
 	var speed_limit: float = clampf(1.0 - pow(speed / top, 3.0), 0.0, 1.0)
-	var power: float = spec["power"]
+	var power: float = float(spec["power"]) * Cheats.power_factor()
 
 	var reversing := forward_speed < 0.6 and brake_input > 0.1 and throttle_input < 0.1
 	if reversing:
@@ -202,7 +213,7 @@ func _update_drivetrain(speed: float) -> void:
 		engine_force = DRIVE_SIGN * power * torque * throttle_input * speed_limit \
 			* grip_multiplier
 		brake = spec["brake_force"] * brake_input
-		if Input.is_action_pressed("handbrake"):
+		if not external_control and Input.is_action_pressed("handbrake"):
 			brake = spec["brake_force"] * 1.4
 			engine_force = 0.0
 
