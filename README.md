@@ -123,6 +123,35 @@ Der rosa Wagen ist eine **eigenständig modellierte Hommage**. Es sind keine
 lizenzierten Fahrzeugdaten enthalten. Wer den Markennamen nicht verwenden
 möchte, ändert eine Zeile: `PINK_CAR_NAME` in `scripts/car_data.gd`.
 
+## Admin-Panel
+
+Dreimal in die **obere rechte Ecke** tippen (innerhalb von zwei Sekunden)
+oeffnet ein verstecktes Panel mit sechs Schaltern:
+
+| Schalter | Wirkung |
+|---|---|
+| **Autopilot** | Faehrt von allein die Ideallinie, so schnell es die Strecke zulaesst |
+| **Dreifache Leistung** | Antriebskraft mal drei — wirkt auch auf den Autopiloten |
+| **Mondschwerkraft** | Schwerkraft auf ein Sechstel |
+| **Zeitlupe** | Alles laeuft auf 35 Prozent Tempo |
+| **Alles im Regenbogenlack** | Jedes Fahrzeug bekommt den Verlaufslack |
+| **Voller Grip ueberall** | Neben der Strecke haftet es wie auf Asphalt |
+
+Bedienbar per Finger, Maus und Tastatur (`A`/`D` waehlen, `Enter` umschalten,
+`Esc` schliesst).
+
+**Der Autopilot faehrt nachweislich sauber.** Gemessen ueber drei volle Runden
+mit dem Prisma R: groesster seitlicher Abstand 2,02 m bei 6,6 m halber
+Fahrbahnbreite, **null Bilder neben der Strecke** in 37 240 Bildern,
+Rundenzeiten 86,0 / 83,8 / 83,8 s. Er rechnet im festen Physiktakt — in
+`_process` haette dieselbe Strecke mal sauber und mal in der Leitplanke
+geendet. Als Sicherheitsnetz setzt er zurueck, falls er doch einmal laenger
+als anderthalb Sekunden steht oder abseits landet.
+
+Die Logik steckt in `scripts/autopilot.gd`: ein Zielpunkt voraus auf
+`Track.curve` fuer die Lenkung, und die Richtungsaenderung zwischen zwei
+Punkten voraus fuer das Zieltempo. Eine eigene Ideallinie braucht es nicht.
+
 ## Aufbau
 
 ```

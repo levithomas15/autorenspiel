@@ -148,6 +148,12 @@ in dieser Reihenfolge prüfen:
 | `scripts/hud.gd` | Tacho, Drehzahlbogen, Rundenzeiten |
 | `scripts/garage.gd` | Auswahl auf dem Drehteller |
 | `scripts/engine_audio.gd` | Motorsound aus Grundton + Harmonischen |
+| `scripts/cheats.gd` | Schalter des Admin-Panels, statisch |
+| `scripts/autopilot.gd` | Selbstfahren entlang `Track.curve` |
+| `scripts/admin_panel.gd` | Das Panel, drei Tipps in die obere rechte Ecke |
+| `scripts/device.gd` | Geraeteprofil samt Qualitaetsstufen |
+| `scripts/device_select.gd` | Auswahlbildschirm beim Start |
+| `scripts/touch_controls.gd` | Lenkrad und Pedale |
 | `tools/smoke_test.gd` | Rauchtest ohne Fenster (siehe oben) |
 
 **Neue Schlüssel in `car_data.gd`:** `"grip"` (Reifengriff, Vorgabe 3.2) und

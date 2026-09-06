@@ -34,11 +34,22 @@ var _off_track: bool = false
 var _diag_layer: CanvasLayer = null
 var _diag_label: Label = null
 
+## Dreimal in die obere rechte Ecke tippen oeffnet das Admin-Panel.
+const CORNER_TAPS := 3
+const CORNER_WINDOW := 2.0
+var _admin: AdminPanel = null
+var _corner_taps: int = 0
+var _corner_deadline: float = 0.0
+
+## Wie lange der Autopilot schon steht oder abseits ist.
+var _stuck_time: float = 0.0
+
 
 func _ready() -> void:
 	_setup_input()
 	_build_diagnostics()
 	# Eine frueher getroffene Wahl wird uebernommen; sonst erst fragen.
+	Cheats.apply_world(get_tree())
 	if Device.load_saved():
 		Device.apply_to(get_viewport())
 		_enter_garage()
@@ -229,8 +240,59 @@ func _start_race() -> void:
 
 
 # --- Ablauf -----------------------------------------------------------------
+## Die Ecke ist ein Quadrat von 13 Prozent der kuerzeren Bildschirmseite -
+## gross genug fuer einen Daumen, klein genug um nicht im Weg zu sein.
+func _corner_rect() -> Rect2:
+	var size := get_viewport().get_visible_rect().size
+	var side: float = minf(size.x, size.y) * 0.13
+	return Rect2(Vector2(size.x - side, 0.0), Vector2(side, side))
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if _admin != null:
+		return
+	var pos := Vector2.INF
+	if event is InputEventScreenTouch and (event as InputEventScreenTouch).pressed:
+		pos = (event as InputEventScreenTouch).position
+	elif event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+			pos = mb.position
+	if pos == Vector2.INF or not _corner_rect().has_point(pos):
+		return
+
+	var now := Time.get_ticks_msec() / 1000.0
+	if now > _corner_deadline:
+		_corner_taps = 0
+	_corner_taps += 1
+	_corner_deadline = now + CORNER_WINDOW
+	if _corner_taps >= CORNER_TAPS:
+		_corner_taps = 0
+		_open_admin()
+
+
+func _open_admin() -> void:
+	if _admin != null:
+		return
+	_admin = AdminPanel.new()
+	_admin.closed.connect(_close_admin)
+	add_child(_admin)
+
+
+func _close_admin() -> void:
+	if _admin == null:
+		return
+	_admin.queue_free()
+	_admin = null
+	# Der Regenbogenlack fuer alle wirkt erst beim naechsten Aufbau.
+	if state == State.GARAGE and _garage != null:
+		_enter_garage()
+
+
 func _process(delta: float) -> void:
 	_update_diagnostics()
+	if _admin != null:
+		return
 	if state == State.DEVICE:
 		return
 	if state == State.GARAGE:
@@ -275,12 +337,47 @@ func _process_race(delta: float) -> void:
 		_off_track)
 
 
+## Der Autopilot rechnet im festen Physiktakt. In `_process` haenge sein
+## Ergebnis an der Bildrate, und dieselbe Strecke endete mal sauber und mal
+## in der Leitplanke.
+func _physics_process(_delta: float) -> void:
+	if state == State.RACE and _car != null and _track != null:
+		_update_autopilot()
+
+
+## Solange der Autopilot laeuft, kommen Gas, Bremse und Lenkung von ihm.
+func _update_autopilot() -> void:
+	var wanted: bool = Cheats.is_on(Cheats.Kind.AUTOPILOT)
+	if _car.external_control != wanted:
+		_car.external_control = wanted
+		_car.external_input = Vector3.ZERO
+	if not wanted:
+		_stuck_time = 0.0
+		return
+	_car.external_input = Autopilot.drive(_car, _track)
+
+	# Sicherheitsnetz. "Faehrt ohne zu crashen" muss auch dann gelten, wenn
+	# die Regelung einmal danebenliegt: wer steht oder neben der Strecke
+	# gelandet ist, wird zurueckgesetzt statt haengen zu bleiben.
+	var lateral: float = _track.lateral_distance(_car.global_position)
+	if _car.speed_kmh < 6.0 or lateral > Track.HALF_WIDTH + Track.CURB_WIDTH:
+		_stuck_time += get_physics_process_delta_time()
+	else:
+		_stuck_time = 0.0
+	if _stuck_time > 1.5:
+		_stuck_time = 0.0
+		_respawn()
+
+
 ## Abseits der Fahrbahn gibt es deutlich weniger Grip - das haelt Abkuerzungen
 ## unattraktiv, ohne dass es dafuer eigene Trigger braucht.
 func _update_surface() -> void:
 	var lateral := _track.lateral_distance(_car.global_position)
 	var edge: float = Track.HALF_WIDTH + Track.CURB_WIDTH
-	if lateral > edge + 0.4:
+	if Cheats.is_on(Cheats.Kind.NO_OFFTRACK):
+		_off_track = lateral > edge + 0.4
+		_car.grip_multiplier = 1.0
+	elif lateral > edge + 0.4:
 		_off_track = true
 		_car.grip_multiplier = 0.42
 	elif lateral > Track.HALF_WIDTH:
