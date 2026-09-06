@@ -25,10 +25,52 @@ var _half_passed: bool = false
 var _countdown: float = 0.0
 var _off_track: bool = false
 
+## Kleine Diagnoseanzeige unten rechts. Sie ueberlebt den Szenenwechsel und
+## verraet, wie schnell das Spiel auf dem jeweiligen Geraet tatsaechlich
+## laeuft - ohne das laesst sich ein "reagiert nicht" aus der Ferne nicht
+## einordnen. Mit F1 ausblendbar.
+var _diag_layer: CanvasLayer = null
+var _diag_label: Label = null
+
 
 func _ready() -> void:
 	_setup_input()
+	_build_diagnostics()
 	_enter_garage()
+
+
+func _build_diagnostics() -> void:
+	_diag_layer = CanvasLayer.new()
+	_diag_layer.name = "Diagnose"
+	_diag_layer.layer = 20
+	add_child(_diag_layer)
+
+	var label := Label.new()
+	label.set_anchors_preset(Control.PRESET_TOP_RIGHT, true)
+	label.offset_left = -430.0
+	label.offset_right = -12.0
+	label.offset_top = 10.0
+	label.offset_bottom = 40.0
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	label.add_theme_font_size_override("font_size", 15)
+	label.add_theme_color_override("font_color", Color(0.65, 0.95, 0.75))
+	label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
+	label.add_theme_constant_override("shadow_offset_x", 1)
+	label.add_theme_constant_override("shadow_offset_y", 1)
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_diag_layer.add_child(label)
+	_diag_label = label
+
+
+func _update_diagnostics() -> void:
+	if _diag_label == null:
+		return
+	if Input.is_key_pressed(KEY_F1):
+		_diag_layer.visible = false
+	var size := get_viewport().get_visible_rect().size
+	_diag_label.text = "%d fps   %dx%d   %s" % [
+		Engine.get_frames_per_second(), int(size.x), int(size.y),
+		RenderingServer.get_video_adapter_name()]
 
 
 # --- Eingaben ---------------------------------------------------------------
@@ -80,6 +122,9 @@ func _setup_input() -> void:
 # --- Zustandswechsel --------------------------------------------------------
 func _clear_scene() -> void:
 	for child in get_children():
+		# Die Diagnoseanzeige bleibt ueber den Szenenwechsel hinweg stehen.
+		if child == _diag_layer:
+			continue
 		remove_child(child)
 		child.queue_free()
 	_garage = null
@@ -140,6 +185,7 @@ func _start_race() -> void:
 
 # --- Ablauf -----------------------------------------------------------------
 func _process(delta: float) -> void:
+	_update_diagnostics()
 	if state == State.GARAGE:
 		if Input.is_action_just_pressed("back"):
 			get_tree().quit()

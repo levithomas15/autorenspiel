@@ -16,6 +16,13 @@ config/icon="res://icon.svg"
 window/size/viewport_width=1920
 window/size/viewport_height=1080
 window/size/mode=3
+; Im Browser ist Vollbild ohne Klick verboten - der Versuch beim Start
+; erzeugt nur eine Fehlermeldung.
+window/size/mode.web=0
+; Auf Retina-Displays rendert Godot sonst in doppelter Aufloesung, also mit
+; der vierfachen Pixelzahl. Das erstickt WebGL2.
+dpi/allow_hidpi=true
+dpi/allow_hidpi.web=false
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
@@ -36,6 +43,10 @@ common/max_physics_steps_per_frame.web=16
 renderer/rendering_method="forward_plus"
 ; Im Browser gibt es kein Forward+ - dort laeuft das Spiel ueber WebGL2.
 renderer/rendering_method.web="gl_compatibility"
+; Die 3D-Aufloesung im Browser zusaetzlich absenken; das HUD bleibt scharf.
+scaling_3d/mode=0
+scaling_3d/scale=1.0
+scaling_3d/scale.web=0.75
 textures/default_filters/anisotropic_filtering_level=3
 textures/default_filters/anisotropic_filtering_level.web=0
 lights_and_shadows/directional_shadow/size=8192
