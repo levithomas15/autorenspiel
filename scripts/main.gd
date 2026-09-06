@@ -46,6 +46,11 @@ var _stuck_time: float = 0.0
 
 
 func _ready() -> void:
+	# Godot erzeugt aus jeder Beruehrung zusaetzlich einen kuenstlichen
+	# Mausklick. Wer beide Ereignisarten behandelt - und das tun hier alle
+	# Bildschirme - bekommt jede Beruehrung doppelt. Im Admin-Panel wurde ein
+	# Schalter dadurch zweimal umgelegt und blieb, wie er war.
+	Input.set_emulate_mouse_from_touch(false)
 	_setup_input()
 	_build_diagnostics()
 	# Eine frueher getroffene Wahl wird uebernommen; sonst erst fragen.
