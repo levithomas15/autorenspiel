@@ -80,6 +80,55 @@ static func car_paint(color: Color, metallic := 0.9, roughness := 0.16,
 	return _apply_common(m)
 
 
+## Regenbogenlack. Die Karosserie wird als Loft gebaut, dessen V-Koordinate
+## von der Front (0) zum Heck (1) laeuft - der Verlauf legt sich damit von
+## selbst in Fahrtrichtung ueber den ganzen Wagen.
+##
+## Die Farben kommen aus einem Verlauf, nicht aus einer Bilddatei. Ein
+## leichtes Eigenleuchten sorgt dafuer, dass die Farben auch im Schatten
+## kraeftig bleiben.
+static func rainbow_paint() -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	var gradient := Gradient.new()
+	gradient.offsets = PackedFloat32Array([0.0, 0.17, 0.33, 0.5, 0.67, 0.83, 1.0])
+	gradient.colors = PackedColorArray([
+		Color(0.95, 0.12, 0.16),
+		Color(1.00, 0.52, 0.05),
+		Color(1.00, 0.88, 0.10),
+		Color(0.15, 0.80, 0.28),
+		Color(0.10, 0.55, 0.95),
+		Color(0.32, 0.22, 0.85),
+		Color(0.72, 0.20, 0.85),
+	])
+	var tex := GradientTexture2D.new()
+	tex.gradient = gradient
+	tex.width = 8
+	tex.height = 256
+	tex.fill_from = Vector2(0.0, 0.0)
+	tex.fill_to = Vector2(0.0, 1.0)
+
+	m.albedo_color = Color.WHITE
+	m.albedo_texture = tex
+	# Bewusst weniger metallisch als der normale Lack: ein Spiegel zeigt die
+	# Umgebung, nicht seine eigene Farbe - der Verlauf ginge sonst unter.
+	m.metallic = 0.30
+	m.metallic_specular = 0.5
+	m.roughness = 0.22
+	m.emission_enabled = true
+	m.emission_texture = tex
+	m.emission = Color.WHITE
+	m.emission_energy_multiplier = 0.12
+	m.clearcoat_enabled = true
+	m.clearcoat = 1.0
+	m.clearcoat_roughness = 0.03
+	m.rim_enabled = true
+	m.rim = 0.35
+	m.rim_tint = 0.4
+	# Der Verlauf muss genau einmal ueber die Karosserie laufen.
+	m.uv1_scale = Vector3(1, 1, 1)
+	return _apply_common(m)
+
+
 ## Getoentes Glas fuer Scheiben und Kuppeln.
 static func glass(tint := Color(0.04, 0.05, 0.07), alpha := 0.72) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()

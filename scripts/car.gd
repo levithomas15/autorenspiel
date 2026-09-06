@@ -25,6 +25,8 @@ var grip_multiplier: float = 1.0
 
 var _steer: float = 0.0
 var max_rpm: float = 8800.0
+## Grundgriff der Reifen. Pro Fahrzeug einstellbar, weil sehr viel Leistung
+## sonst nur die Raeder durchdrehen laesst.
 var _base_friction: float = 3.2
 var _wheels: Array[VehicleWheel3D] = []
 var _tail_material: StandardMaterial3D = null
@@ -44,6 +46,9 @@ static func create(car_spec: Dictionary) -> Car:
 	car.linear_damp = 0.02
 	car.angular_damp = 0.15
 	car.continuous_cd = true
+
+	# Muss vor _build_wheels() stehen - dort wird der Wert schon gebraucht.
+	car._base_friction = float(car_spec.get("grip", 3.2))
 
 	car._build_collision()
 	car._build_wheels()

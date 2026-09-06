@@ -16,7 +16,7 @@ const PINK_CAR_NAME := "911 GT3 RS Rosa"
 
 
 static func all() -> Array:
-	return [hornet_gt(), vanta_s(), aurora_ev(), pink_gt3_rs()]
+	return [hornet_gt(), vanta_s(), aurora_ev(), pink_gt3_rs(), prisma_rainbow()]
 
 
 static func hornet_gt() -> Dictionary:
@@ -214,4 +214,64 @@ static func pink_gt3_rs() -> Dictionary:
 		"drive": "rwd",
 		"downforce": 9.5,
 		"gears": 7,
+	}
+
+
+## Regenbogen-Prototyp. Hoechstgeschwindigkeit 500 km/h, und er beschleunigt
+## dreimal so kraeftig wie der bis dahin schnellste Wagen (Aurora EV).
+##
+## Der Vergleich laeuft ueber Leistung je Masse, denn genau die bestimmt die
+## Beschleunigung: Aurora kommt auf 3400 / 1720 = 1.98, dieser hier auf
+## 7000 / 1180 = 5.93 - also exakt das Dreifache. Damit die Kraft nicht nur
+## die Raeder durchdrehen laesst, braucht er deutlich mehr Griff und Allrad.
+static func prisma_rainbow() -> Dictionary:
+	return {
+		"name": "Prisma R",
+		"subtitle": "Regenbogen - dreifache Beschleunigung, 500 km/h",
+		"paint": Color(0.9, 0.9, 0.9),
+		"paint_style": "rainbow",
+		"accent": Color(0.05, 0.05, 0.06),
+		"rim_color": Color(0.86, 0.86, 0.92),
+		"glass_tint": Color(0.03, 0.03, 0.05),
+		"length": 4.72,
+		# Flacher und breiter als alles andere im Feld.
+		"body": [
+			[0.00, 0.34, 0.20, 0.34, 3.4, 4.0],
+			[0.03, 0.70, 0.13, 0.44, 3.2, 5.0],
+			[0.09, 0.92, 0.10, 0.52, 3.4, 7.0],
+			[0.17, 1.02, 0.09, 0.60, 3.4, 8.0],
+			[0.26, 1.03, 0.09, 0.66, 3.0, 8.0],
+			[0.34, 1.02, 0.09, 0.80, 2.8, 8.0],
+			[0.42, 1.00, 0.09, 0.97, 2.5, 8.0],
+			[0.50, 0.99, 0.10, 1.06, 2.4, 8.0],
+			[0.58, 1.00, 0.10, 1.07, 2.4, 8.0],
+			[0.66, 1.02, 0.11, 1.00, 2.6, 8.0],
+			[0.74, 1.05, 0.11, 0.90, 2.8, 8.0],
+			[0.82, 1.06, 0.12, 0.82, 3.0, 7.0],
+			[0.90, 1.03, 0.14, 0.78, 3.0, 6.0],
+			[0.96, 0.93, 0.19, 0.74, 3.2, 5.0],
+			[1.00, 0.58, 0.27, 0.66, 3.4, 4.0],
+		],
+		"cabin": [0.33, 0.71],
+		"front_axle_z": -1.42,
+		"rear_axle_z": 1.40,
+		"track_half": 0.90,
+		"wheel_radius_front": 0.350,
+		"wheel_radius_rear": 0.375,
+		"tire_width_front": 0.30,
+		"tire_width_rear": 0.38,
+		"rim_style": "double",
+		"rim_spokes": 7,
+		"wing": "active",
+		"headlight": "slim",
+		"exhaust": "none",
+		"mass": 1180.0,
+		"power": 8100.0,
+		"grip": 6.6,
+		"top_speed": 138.9,
+		"brake_force": 125.0,
+		"steer_max": 0.40,
+		"drive": "awd",
+		"downforce": 10.0,
+		"gears": 2,
 	}

@@ -102,6 +102,22 @@ Drehteller, `Enter` startet das Zeitfahren.
 | Vanta S | Frontmotor-GT, schwer, viel Drehmoment | Graphit-Schwarz |
 | Aurora EV | Allrad-Elektro, sofortiger Schub | Elektrik-Blau |
 | **911 GT3 RS Rosa** | Heckmotor, Heckantrieb, großer Heckflügel | **Rosa-Metallic mit Klarlack** |
+| **Prisma R** | Allrad-Prototyp, 500 km/h, dreifache Beschleunigung | **Regenbogen-Verlauf** |
+
+Der **Prisma R** ist der schnellste Wagen im Feld: Höchstgeschwindigkeit
+500 km/h, und er beschleunigt dreimal so kräftig wie der bis dahin schnellste
+(Aurora EV). Gemessen von 0 auf 100 km/h: **1,41 s gegenüber 4,13 s**.
+
+Möglich macht das die Leistung je Masse — genau die bestimmt die
+Beschleunigung. Aurora kommt auf 3400 / 1720 = 1,98, der Prisma auf
+8100 / 1180 = 6,86. Damit die Kraft nicht bloß die Räder durchdrehen lässt,
+hat er Allradantrieb und über `"grip"` deutlich mehr Reifengriff; dieser
+Schlüssel ist neu und wirkt bei jedem Fahrzeug.
+
+Sein Lack kommt aus einem Farbverlauf statt einer einzelnen Farbe. Die
+Karosserie wird als Loft gebaut, dessen V-Koordinate von der Front zum Heck
+läuft — der Regenbogen legt sich damit von selbst in Fahrtrichtung über den
+ganzen Wagen. Auch dafür gibt es keine Bilddatei.
 
 Der rosa Wagen ist eine **eigenständig modellierte Hommage**. Es sind keine
 lizenzierten Fahrzeugdaten enthalten. Wer den Markennamen nicht verwenden

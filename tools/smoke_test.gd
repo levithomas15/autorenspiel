@@ -68,5 +68,8 @@ func _report() -> void:
 		% [car.forward_speed, travelled])
 	print("    Abstand zur Ideallinie %.2f m, neben der Strecke: %s"
 		% [_main._track.lateral_distance(car.global_position), _main._off_track])
-	if car.forward_speed < 0.0 or travelled < 0.0:
-		push_error("Fahrzeug bewegt sich rueckwaerts oder gegen die Streckenrichtung!")
+	# Nur der zurueckgelegte Weg zaehlt. Die Momentangeschwindigkeit ist kein
+	# Kriterium: ein Fahrzeug, das nach kraeftiger Beschleunigung an der
+	# Leitplanke steht, liest sich als -0.0 und loeste falschen Alarm aus.
+	if travelled < 0.0:
+		push_error("Fahrzeug faehrt gegen die Streckenrichtung!")

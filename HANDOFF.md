@@ -150,6 +150,10 @@ in dieser Reihenfolge prüfen:
 | `scripts/engine_audio.gd` | Motorsound aus Grundton + Harmonischen |
 | `tools/smoke_test.gd` | Rauchtest ohne Fenster (siehe oben) |
 
+**Neue Schlüssel in `car_data.gd`:** `"grip"` (Reifengriff, Vorgabe 3.2) und
+`"paint_style": "rainbow"` für den Verlaufslack. Beide sind optional — Fahrzeuge
+ohne sie verhalten sich unverändert.
+
 ## Bewusst nicht gebaut
 
 - **Keine KI-Gegner.** Auf Wunsch des Nutzers Solo-Zeitfahren, damit die Zeit
