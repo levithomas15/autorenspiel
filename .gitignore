@@ -4,3 +4,7 @@
 # Godot legt beim Export Bilder in docs/ ab - die sollen nicht als
 # Projekt-Assets reimportiert werden.
 docs/*.import
+
+# Godot legt .uid-Dateien auch fuer geloeschte Wegwerfskripte an.
+/_*.gd.uid
+/_*.gd
