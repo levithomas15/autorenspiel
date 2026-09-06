@@ -47,7 +47,9 @@ static func build(spec: Dictionary) -> Node3D:
 	var root := Node3D.new()
 	root.name = "CarModel"
 
-	var paint := Mats.car_paint(spec["paint"])
+	# Der Regenbogenwagen bekommt statt einer Farbe einen Verlauf.
+	var paint: StandardMaterial3D = Mats.rainbow_paint() \
+		if spec.get("paint_style", "") == "rainbow" else Mats.car_paint(spec["paint"])
 	var accent := Mats.matte(spec["accent"], 0.4)
 	var carbon := Mats.carbon()
 
