@@ -159,7 +159,11 @@ func _process(delta: float) -> void:
 	elif Input.is_action_just_pressed("select_left"):
 		_show(index - 1)
 	if Input.is_action_just_pressed("accept"):
+		# Der Empfaenger raeumt die Szene sofort ab. Alles Weitere in dieser
+		# Funktion liefe dann auf Knoten, die nicht mehr im Baum haengen -
+		# `look_at` unten meldete genau das.
 		car_chosen.emit(index)
+		return
 
 	_orbit_input = Input.get_action_strength("orbit_right") \
 		- Input.get_action_strength("orbit_left")
