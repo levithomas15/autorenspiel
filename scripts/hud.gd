@@ -86,22 +86,32 @@ func _build() -> void:
 
 	_car_label = _make_label(info, Vector2(0, 0), Vector2(420, 34), 24, ACCENT)
 	_lap_label = _make_label(info, Vector2(0, 38), Vector2(420, 30), 20, DIM)
-	_time_label = _make_label(info, Vector2(0, 70), Vector2(420, 46), 38, Color.WHITE)
-	_last_label = _make_label(info, Vector2(0, 120), Vector2(420, 26), 17, DIM)
-	_best_label = _make_label(info, Vector2(0, 146), Vector2(420, 26), 17,
+	# Die Zeilenhoehen richten sich nach der Schriftgroesse - ein Label waechst
+	# auf seine Mindesthoehe, zu enge Abstaende laufen sonst ineinander.
+	_time_label = _make_label(info, Vector2(0, 70), Vector2(420, 52), 38, Color.WHITE)
+	_last_label = _make_label(info, Vector2(0, 128), Vector2(420, 24), 17, DIM)
+	_best_label = _make_label(info, Vector2(0, 154), Vector2(420, 24), 17,
 		Color(1.0, 0.85, 0.35))
 
 	# --- Meldungen und Hilfe ------------------------------------------------
-	_message = _make_label(root, Vector2(0, 0), Vector2(0, 0), 44, ACCENT,
+	# Anker und Offsets werden getrennt gesetzt. `position` waere hier falsch:
+	# das ist die Lage im Elternraum, nicht der Versatz zum Anker - die
+	# Meldung landete damit halb ausserhalb des Bildes.
+	_message = _make_label(root, Vector2.ZERO, Vector2.ZERO, 44, ACCENT,
 		HORIZONTAL_ALIGNMENT_CENTER)
-	_message.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	_message.position = Vector2(-400, 120)
-	_message.size = Vector2(800, 60)
+	_message.set_anchors_preset(Control.PRESET_TOP_WIDE, true)
+	_message.offset_left = 0.0
+	_message.offset_right = 0.0
+	_message.offset_top = 120.0
+	_message.offset_bottom = 190.0
 	_message.modulate.a = 0.0
 
-	_hint = _make_label(root, Vector2(32, -60), Vector2(900, 30), 16, DIM)
-	_hint.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	_hint.position = Vector2(32, -56)
+	_hint = _make_label(root, Vector2.ZERO, Vector2.ZERO, 16, DIM)
+	_hint.set_anchors_preset(Control.PRESET_BOTTOM_WIDE, true)
+	_hint.offset_left = 32.0
+	_hint.offset_right = -32.0
+	_hint.offset_top = -52.0
+	_hint.offset_bottom = -16.0
 	_hint.text = "W/S Gas und Bremse   A/D Lenken   Leertaste Handbremse   " \
 		+ "C Kamera   L Licht   R Zuruecksetzen   Esc Garage"
 

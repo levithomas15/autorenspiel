@@ -154,7 +154,7 @@ func _build_road() -> void:
 	# Randsteine
 	for i in steps:
 		var col: Color = COLOR_CURB_A if (i / 2) % 2 == 0 else COLOR_CURB_B
-		for side in [-1.0, 1.0]:
+		for side: float in [-1.0, 1.0]:
 			var inner: float = side * HALF_WIDTH
 			var outer: float = side * (HALF_WIDTH + CURB_WIDTH)
 			var a := _point(i, inner, 0.005)
@@ -177,7 +177,7 @@ func _build_verge() -> void:
 	var st := MeshLib.new_surface()
 	var steps := _samples.size()
 	for i in steps:
-		for side in [-1.0, 1.0]:
+		for side: float in [-1.0, 1.0]:
 			var inner: float = side * (HALF_WIDTH + CURB_WIDTH)
 			var outer: float = side * (HALF_WIDTH + VERGE_WIDTH)
 			var a := _point(i, inner, 0.02)
@@ -214,7 +214,7 @@ func _build_barriers() -> void:
 	var st := MeshLib.new_surface()
 	var steps := _samples.size()
 	for i in steps:
-		for side in [-1.0, 1.0]:
+		for side: float in [-1.0, 1.0]:
 			var lateral: float = side * (HALF_WIDTH + BARRIER_OFFSET)
 			var a := _point(i, lateral, 0.10)
 			var d := _point(i + 1, lateral, 0.10)
@@ -251,7 +251,7 @@ func _build_start_gantry() -> void:
 	var up := frame.basis.y
 	var pos := frame.origin
 	var span := HALF_WIDTH + 2.4
-	for side in [-1.0, 1.0]:
+	for side: float in [-1.0, 1.0]:
 		var foot := pos + right * (side * span)
 		MeshLib.add_box(st, foot + up * 3.0, Vector3(0.5, 6.0, 0.5))
 	MeshLib.add_box(st, pos + up * 6.2, Vector3(span * 2.2, 0.7, 0.5))
@@ -284,7 +284,7 @@ func _scatter_trees() -> void:
 	var transforms: Array[Transform3D] = []
 	var steps := _samples.size()
 	for i in range(0, steps, 2):
-		for side in [-1.0, 1.0]:
+		for side: float in [-1.0, 1.0]:
 			if rng.randf() > 0.55:
 				continue
 			var lateral: float = side * rng.randf_range(HALF_WIDTH + 16.0,

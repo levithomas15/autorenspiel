@@ -1,0 +1,6 @@
+# Godots Import-Zwischenstand, gehoert nicht ins Repository.
+.godot/
+
+# Godot legt beim Export Bilder in docs/ ab - die sollen nicht als
+# Projekt-Assets reimportiert werden.
+docs/*.import

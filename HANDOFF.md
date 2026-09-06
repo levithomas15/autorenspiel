@@ -22,25 +22,100 @@ Branches: `main` und `claude/godot-racing-game-cars-max3ea` — identischer Stan
 
 ## Status
 
-**Vollständig gebaut und gepusht. Noch nie ausgeführt.**
+**Gebaut und erstmals ausgeführt** — mit Godot 4.4.1 headless, alle vier
+Fahrzeuge fahren.
 
-Godot war in der Bau-Umgebung nicht installiert, ein Testlauf war deshalb
-unmöglich. Geprüft wurde stattdessen:
+Beim ersten echten Start fielen drei Parse-Fehler auf, die das Spiel komplett
+am Laden hinderten (`car.gd:82`, `garage.gd:126`, `track.gd:255`): Schleifen
+über Array-Literale wie `for s in [-1.0, 1.0]` liefern eine `Variant`-Variable,
+und aus einer `Variant` kann `:=` keinen Typ ableiten. Behoben durch explizite
+Schleifentypen (`for s: float in [...]`, `for axle: String in [...]`).
 
-- jede Datei statisch gegen die Godot-4.4-API (Klassen, Properties, Enums)
-- alle klassenübergreifenden Aufrufe lösen auf (Prüfskript)
-- alle 29 Fahrzeug-Schlüssel in allen vier Definitionen vorhanden
-- keine fehlenden `res://`-Pfade, Klammern ausgeglichen, nur Tab-Einrückung
+Danach läuft es durch: Strecke 2287 m, Garage und Rennen bauen sich fehlerfrei
+auf, alle vier Autos beschleunigen und bleiben auf der Fahrbahn.
 
-Der erste `F5`-Start ist also der eigentliche Test.
+Inzwischen auch **mit Bild geprüft** — unter Xvfb, sowohl im
+Kompatibilitätsmodus als auch in Forward+ über den Software-Vulkan lavapipe.
+Karosserien, Räder, Strecke, Randsteine, Leitplanken, Bäume, Himmel und HUD
+rendern. Dabei fielen drei HUD-Fehler auf (siehe unten), die behoben sind.
+
+**Einschränkung:** gerendert wurde per Software-Rasterizer. Für Geometrie und
+Layout reicht das, für die Bildwirkung nicht — SDFGI konvergiert dabei nicht,
+TAA und SSR fehlen im Kompatibilitätsmodus. Wie Lack, Spiegelungen und
+Beleuchtung wirklich aussehen, beurteilt erst dein `F5` auf dem Mac.
+
+### Rauchtest
+
+```
+godot --headless --path . --script res://tools/smoke_test.gd
+```
+
+Fährt jedes Fahrzeug rund zehn Sekunden mit Vollgas und meldet Tempo, Gang und
+Streckenlage. Skriptfehler tauchen dabei in der Ausgabe auf. Lohnt sich nach
+jeder Änderung an Physik, Strecke oder Fahrzeugdaten — es ist deutlich
+schneller als das Spiel von Hand zu starten.
+
+### Behobene HUD-Fehler
+
+Bei einem `Control` ist `position` die Lage im Elternraum, **nicht** der
+Versatz zum Anker. `set_anchors_preset(...)` gefolgt von
+`position = Vector2(-400, 120)` setzte die Meldung deshalb wörtlich auf
+x = −400. Folgen, alle drei behoben in `scripts/hud.gd`:
+
+- Countdown, Rundenzeiten und „Bestzeit" standen halb außerhalb des linken
+  Bildrands — praktisch unsichtbar.
+- Die Steuerungshinweise lagen bei y = −56, also über dem oberen Bildrand.
+- Der Zeitblock oben links überlappte sich: ein `Label` wächst auf seine
+  Mindesthöhe, die Zeilenabstände waren für Schriftgröße 38 zu eng.
+
+Anker und Offsets werden jetzt getrennt gesetzt (`PRESET_TOP_WIDE` bzw.
+`PRESET_BOTTOM_WIDE` plus `offset_*`). Das ist unabhängig davon, wann das
+Elternelement seine Größe bekommt.
+
+### Offene Punkte fürs Auge
+
+Zwei Dinge sind aufgefallen, aber bewusst **nicht** geändert — sie sind
+Geschmacksfragen und brauchen ein Urteil auf echter Hardware:
+
+1. **Das Start-Ziel-Feld ist eine große weiße Fläche.** `_build_road()` gibt
+   den ersten beiden Schritten (`on_grid: i < 2`, bei `STEP = 3.0` also 6 m)
+   ein Karo, dessen Spalten sich nach dem Spaltenindex abwechseln. Zwei dieser
+   Spalten sind 3,5 m breit — daraus werden zwei breite weiße Bahnen statt
+   eines Karomusters. Ein feineres Muster bräuchte eigene Spalten für den
+   Startbereich.
+
+2. **Die Normal-Map des Asphalts erzeugt Streifen.** Ein Testrender ohne sie
+   ergab eine sauber graue Fahrbahn. Ursache sind die UVs in `_quad()`: `u`
+   läuft je Streifen fest von 0 bis 1, egal ob der Streifen 0,2 m oder 3,5 m
+   breit ist. Die Texeldichte ist damit von Streifen zu Streifen völlig
+   verschieden und die Textur auf den breiten Bahnen stark gedehnt. Sauber
+   wäre, `u` aus der tatsächlichen Breite zu bilden — das ändert `_quad()`
+   und alle Aufrufer.
+
+Zusätzlich begrenzt `Mats.noise_texture()` jetzt optional den Wertebereich
+(`low`/`high`). Godot **multipliziert** `roughness` mit der Texturhelligkeit;
+ohne Untergrenze fiel die Rauheit des Asphalts stellenweise auf 0, die Fläche
+wurde dort spiegelglatt. Im Software-Render war davon nichts zu sehen — mit
+aktivem SSR auf echter Hardware sehr wahrscheinlich schon.
+
+### Beobachtung zur Abstimmung
+
+Aus dem Stand über 6,8 Sekunden Vollgas erreichen die drei Verbrenner nur
+64–68 km/h, der allradgetriebene Aurora EV dagegen 133 km/h. Das ist kein
+Fehler — die Heck- und Frontantriebe verlieren Traktion, während der Allradler
+seine Leistung auf vier Räder verteilt. Der Unterschied ist aber größer als er
+sein sollte; für einen GT3 RS ist das zu zäh. Ansatzpunkte, falls du das
+angehen willst: `power` und `mass` in `scripts/car_data.gd`, sowie
+`_base_friction` und der Drehmomentverlauf in `scripts/car.gd:182`.
 
 ## Erste Schritte in einer neuen Session
 
 Wenn beim Start Fehler auftreten, sind das die wahrscheinlichsten Stellen —
 in dieser Reihenfolge prüfen:
 
-1. **Godot-Version.** Alles ist gegen 4.4 geschrieben. Bei 4.2/4.3 können
-   einzelne Environment-Properties fehlen (`ssil_*`, `volumetric_fog_*`).
+1. **Godot-Version.** Alles ist gegen 4.4 geschrieben und mit 4.4.1 getestet.
+   Bei 4.2/4.3 können einzelne Environment-Properties fehlen (`ssil_*`,
+   `volumetric_fog_*`).
 2. **Fahrzeug sinkt ein oder hüpft.** `scripts/car.gd`, `_build_wheels()`:
    `suspension_stiffness`, `suspension_travel`, `wheel_rest_length` und die
    Höhe der Kollisionsboxen in `_build_collision()` hängen zusammen. Der
@@ -73,6 +148,7 @@ in dieser Reihenfolge prüfen:
 | `scripts/hud.gd` | Tacho, Drehzahlbogen, Rundenzeiten |
 | `scripts/garage.gd` | Auswahl auf dem Drehteller |
 | `scripts/engine_audio.gd` | Motorsound aus Grundton + Harmonischen |
+| `tools/smoke_test.gd` | Rauchtest ohne Fenster (siehe oben) |
 
 ## Bewusst nicht gebaut
 

@@ -16,6 +16,45 @@ deshalb nur aus Text und lässt sich vollständig lesen und verändern.
 
 Beim ersten Start wird die Strecke erzeugt; das dauert einen Moment.
 
+Ob alles läuft, lässt sich auch ohne Fenster prüfen:
+
+```
+godot --headless --path . --script res://tools/smoke_test.gd
+```
+
+Das fährt jedes der vier Fahrzeuge kurz mit Vollgas und meldet Tempo, Gang und
+Streckenlage — praktisch nach Änderungen an Physik, Strecke oder Fahrzeugdaten.
+
+## Im Browser spielen
+
+Unter `docs/` liegt ein fertiger Web-Export (Godot fuer WebAssembly). Er
+laesst sich ueber GitHub Pages veroeffentlichen:
+
+**Settings → Pages → Source**
+
+- entweder **„GitHub Actions"** — dann uebernimmt `.github/workflows/pages.yml`
+  jede weitere Veroeffentlichung automatisch, sobald sich `docs/` aendert
+- oder **„Deploy from a branch"** mit Branch `main` und Ordner `/docs` —
+  ganz ohne Workflow
+
+Adresse danach: **https://levithomas15.github.io/autorenspiel/**
+
+Das erstmalige Einschalten muss von Hand geschehen; GitHub erlaubt das
+Anlegen einer Pages-Seite nur angemeldeten Personen, nicht dem Token eines
+Workflows.
+
+Neu bauen laesst sich der Export mit:
+
+```
+godot --headless --export-release "Web"
+```
+
+Im Browser laeuft das Spiel ueber WebGL2 statt Forward+. SDFGI, SSAO, SSR
+und der volumetrische Nebel entfallen dort — auf dem Desktop bleibt alles
+wie bisher. Von den 43 MB ist fast alles die Godot-Laufzeit; die Spieldaten
+sind 92 KB, weil Modelle, Texturen und Sound erst beim Start berechnet
+werden.
+
 ## Steuerung
 
 | Aktion | Tastatur | Gamepad |
@@ -62,6 +101,7 @@ scripts/world_env.gd  Beleuchtung und Post-Processing
 scripts/chase_camera.gd  Vier Kameraperspektiven
 scripts/hud.gd        Tacho, Drehzahlbogen, Rundenzeiten
 scripts/engine_audio.gd  Motorsound aus Grundton und Harmonischen
+tools/smoke_test.gd   Rauchtest ohne Fenster
 ```
 
 ## Eigene Anpassungen
