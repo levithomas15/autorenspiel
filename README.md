@@ -34,8 +34,8 @@ laesst sich ueber GitHub Pages veroeffentlichen:
 
 - entweder **„GitHub Actions"** — dann uebernimmt `.github/workflows/pages.yml`
   jede weitere Veroeffentlichung automatisch, sobald sich `docs/` aendert
-- oder **„Deploy from a branch"** mit Branch `claude/godot-rennspiel-start-nywmuk`
-  und Ordner `/docs` — ganz ohne Workflow
+- oder **„Deploy from a branch"** mit Branch `main` und Ordner `/docs` —
+  ganz ohne Workflow
 
 Adresse danach: **https://levithomas15.github.io/autorenspiel/**
 

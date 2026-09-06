@@ -9,7 +9,7 @@ name: Pages
 
 on:
   push:
-    branches: [claude/godot-rennspiel-start-nywmuk]
+    branches: [main, claude/godot-rennspiel-start-nywmuk]
     paths:
       - "docs/**"
       - ".github/workflows/pages.yml"
