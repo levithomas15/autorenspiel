@@ -19,9 +19,17 @@ static func _apply_common(m: StandardMaterial3D) -> StandardMaterial3D:
 	return m
 
 
+## `low` und `high` begrenzen den Wertebereich der Textur.
+##
+## Wichtig fuer Rauheitskarten: Godot multipliziert `roughness` mit dem
+## Texturwert. Eine ungebremste Rauschtextur laeuft bis 0 herunter und macht
+## die Flaeche dort spiegelglatt - der Asphalt warf dann ein riesiges weisses
+## Glanzband der Sonne zurueck. Mit einem Boden von etwa 0.7 bleibt die
+## Struktur sichtbar, ohne dass die Rauheit zusammenbricht.
 static func noise_texture(freq: float, octaves: int, seed_value: int, size := 512,
-		normal_map := false, bump := 1.0) -> NoiseTexture2D:
-	var key := "noise_%f_%d_%d_%d_%s_%f" % [freq, octaves, seed_value, size, normal_map, bump]
+		normal_map := false, bump := 1.0, low := 0.0, high := 1.0) -> NoiseTexture2D:
+	var key := "noise_%f_%d_%d_%d_%s_%f_%f_%f" % [freq, octaves, seed_value, size,
+		normal_map, bump, low, high]
 	if _cache.has(key):
 		return _cache[key]
 	var n := FastNoiseLite.new()
@@ -36,6 +44,11 @@ static func noise_texture(freq: float, octaves: int, seed_value: int, size := 51
 	tex.noise = n
 	tex.as_normal_map = normal_map
 	tex.bump_strength = bump
+	if not normal_map and (low > 0.0 or high < 1.0):
+		var ramp := Gradient.new()
+		ramp.set_color(0, Color(low, low, low))
+		ramp.set_color(1, Color(high, high, high))
+		tex.color_ramp = ramp
 	_cache[key] = tex
 	return tex
 
@@ -51,7 +64,7 @@ static func car_paint(color: Color, metallic := 0.9, roughness := 0.16,
 	# Feiner Metallic-Effekt: die Rauheit wird minimal aufgebrochen, dadurch
 	# funkelt der Lack im Streiflicht wie echter Metallic-Lack.
 	if flake > 0.0:
-		m.roughness_texture = noise_texture(0.9, 4, 12, 256)
+		m.roughness_texture = noise_texture(0.9, 4, 12, 256, false, 1.0, 0.62, 1.0)
 		m.roughness_texture_channel = BaseMaterial3D.TEXTURE_CHANNEL_RED
 		m.roughness = clampf(roughness + flake * 0.12, 0.02, 1.0)
 		m.normal_enabled = true
@@ -160,7 +173,7 @@ static func asphalt() -> StandardMaterial3D:
 	m.albedo_color = Color.WHITE
 	m.metallic = 0.0
 	m.roughness = 0.72
-	m.roughness_texture = noise_texture(3.0, 4, 91, 512)
+	m.roughness_texture = noise_texture(3.0, 4, 91, 512, false, 1.0, 0.72, 1.0)
 	m.roughness_texture_channel = BaseMaterial3D.TEXTURE_CHANNEL_RED
 	m.normal_enabled = true
 	m.normal_texture = noise_texture(4.5, 4, 91, 512, true, 1.1)

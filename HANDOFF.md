@@ -34,10 +34,15 @@ Schleifentypen (`for s: float in [...]`, `for axle: String in [...]`).
 Danach läuft es durch: Strecke 2287 m, Garage und Rennen bauen sich fehlerfrei
 auf, alle vier Autos beschleunigen und bleiben auf der Fahrbahn.
 
-Was noch aussteht: **kein Test mit Bild.** Geprüft ist Logik, Physik und
-Streckengeometrie — nicht, wie das Ganze tatsächlich aussieht. Beleuchtung,
-Materialien, Kameraführung und HUD-Layout beurteilt erst der erste `F5`-Start
-mit Fenster.
+Inzwischen auch **mit Bild geprüft** — unter Xvfb, sowohl im
+Kompatibilitätsmodus als auch in Forward+ über den Software-Vulkan lavapipe.
+Karosserien, Räder, Strecke, Randsteine, Leitplanken, Bäume, Himmel und HUD
+rendern. Dabei fielen drei HUD-Fehler auf (siehe unten), die behoben sind.
+
+**Einschränkung:** gerendert wurde per Software-Rasterizer. Für Geometrie und
+Layout reicht das, für die Bildwirkung nicht — SDFGI konvergiert dabei nicht,
+TAA und SSR fehlen im Kompatibilitätsmodus. Wie Lack, Spiegelungen und
+Beleuchtung wirklich aussehen, beurteilt erst dein `F5` auf dem Mac.
 
 ### Rauchtest
 
@@ -49,6 +54,49 @@ Fährt jedes Fahrzeug rund zehn Sekunden mit Vollgas und meldet Tempo, Gang und
 Streckenlage. Skriptfehler tauchen dabei in der Ausgabe auf. Lohnt sich nach
 jeder Änderung an Physik, Strecke oder Fahrzeugdaten — es ist deutlich
 schneller als das Spiel von Hand zu starten.
+
+### Behobene HUD-Fehler
+
+Bei einem `Control` ist `position` die Lage im Elternraum, **nicht** der
+Versatz zum Anker. `set_anchors_preset(...)` gefolgt von
+`position = Vector2(-400, 120)` setzte die Meldung deshalb wörtlich auf
+x = −400. Folgen, alle drei behoben in `scripts/hud.gd`:
+
+- Countdown, Rundenzeiten und „Bestzeit" standen halb außerhalb des linken
+  Bildrands — praktisch unsichtbar.
+- Die Steuerungshinweise lagen bei y = −56, also über dem oberen Bildrand.
+- Der Zeitblock oben links überlappte sich: ein `Label` wächst auf seine
+  Mindesthöhe, die Zeilenabstände waren für Schriftgröße 38 zu eng.
+
+Anker und Offsets werden jetzt getrennt gesetzt (`PRESET_TOP_WIDE` bzw.
+`PRESET_BOTTOM_WIDE` plus `offset_*`). Das ist unabhängig davon, wann das
+Elternelement seine Größe bekommt.
+
+### Offene Punkte fürs Auge
+
+Zwei Dinge sind aufgefallen, aber bewusst **nicht** geändert — sie sind
+Geschmacksfragen und brauchen ein Urteil auf echter Hardware:
+
+1. **Das Start-Ziel-Feld ist eine große weiße Fläche.** `_build_road()` gibt
+   den ersten beiden Schritten (`on_grid: i < 2`, bei `STEP = 3.0` also 6 m)
+   ein Karo, dessen Spalten sich nach dem Spaltenindex abwechseln. Zwei dieser
+   Spalten sind 3,5 m breit — daraus werden zwei breite weiße Bahnen statt
+   eines Karomusters. Ein feineres Muster bräuchte eigene Spalten für den
+   Startbereich.
+
+2. **Die Normal-Map des Asphalts erzeugt Streifen.** Ein Testrender ohne sie
+   ergab eine sauber graue Fahrbahn. Ursache sind die UVs in `_quad()`: `u`
+   läuft je Streifen fest von 0 bis 1, egal ob der Streifen 0,2 m oder 3,5 m
+   breit ist. Die Texeldichte ist damit von Streifen zu Streifen völlig
+   verschieden und die Textur auf den breiten Bahnen stark gedehnt. Sauber
+   wäre, `u` aus der tatsächlichen Breite zu bilden — das ändert `_quad()`
+   und alle Aufrufer.
+
+Zusätzlich begrenzt `Mats.noise_texture()` jetzt optional den Wertebereich
+(`low`/`high`). Godot **multipliziert** `roughness` mit der Texturhelligkeit;
+ohne Untergrenze fiel die Rauheit des Asphalts stellenweise auf 0, die Fläche
+wurde dort spiegelglatt. Im Software-Render war davon nichts zu sehen — mit
+aktivem SSR auf echter Hardware sehr wahrscheinlich schon.
 
 ### Beobachtung zur Abstimmung
 
