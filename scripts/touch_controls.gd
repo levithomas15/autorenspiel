@@ -154,11 +154,12 @@ func _zone_at(pos: Vector2) -> int:
 func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		var touch := event as InputEventScreenTouch
-		if touch.pressed:
-			_press(touch.index, touch.position)
-		else:
-			_release(touch.index)
-		get_viewport().set_input_as_handled()
+		var used: bool = _press(touch.index, touch.position) if touch.pressed \
+			else _release(touch.index)
+		# Nur was wirklich ein Bedienelement trifft, gilt als erledigt. Sonst
+		# erreicht der Dreifachtipp in die Ecke das Admin-Panel nie.
+		if used:
+			get_viewport().set_input_as_handled()
 	elif event is InputEventScreenDrag:
 		var drag := event as InputEventScreenDrag
 		_move(drag.index, drag.position)
@@ -175,12 +176,11 @@ func _input(event: InputEvent) -> void:
 			_move(-1, (event as InputEventMouseMotion).position)
 
 
-func _press(index: int, pos: Vector2) -> void:
+## Gibt zurueck, ob die Beruehrung ein Bedienelement getroffen hat.
+func _press(index: int, pos: Vector2) -> bool:
 	var zone := _zone_at(pos)
 	if zone == Zone.NONE:
-		if not racing:
-			_press_garage(pos)
-		return
+		return _press_garage(pos) if not racing else false
 	_fingers[index] = zone
 	match zone:
 		Zone.WHEEL:
@@ -196,6 +196,7 @@ func _press(index: int, pos: Vector2) -> void:
 		Zone.GARAGE:
 			garage_requested.emit()
 	_canvas.queue_redraw()
+	return true
 
 
 func _move(index: int, pos: Vector2) -> void:
@@ -212,9 +213,9 @@ func _move(index: int, pos: Vector2) -> void:
 	_canvas.queue_redraw()
 
 
-func _release(index: int) -> void:
+func _release(index: int) -> bool:
 	if not _fingers.has(index):
-		return
+		return false
 	match int(_fingers[index]):
 		Zone.GAS:
 			_throttle = 0.0
@@ -224,6 +225,7 @@ func _release(index: int) -> void:
 			_handbrake = false
 	_fingers.erase(index)
 	_canvas.queue_redraw()
+	return true
 
 
 func _angle_to(pos: Vector2) -> float:
@@ -280,19 +282,25 @@ func _exit_tree() -> void:
 
 # --- Garage ------------------------------------------------------------------
 
-func _press_garage(pos: Vector2) -> void:
+func _press_garage(pos: Vector2) -> bool:
+	var action := ""
 	if _start_rect().has_point(pos):
-		Input.action_press("accept")
-		await get_tree().process_frame
-		Input.action_release("accept")
+		action = "accept"
 	elif _arrow_rect(true).has_point(pos):
-		Input.action_press("select_right")
-		await get_tree().process_frame
-		Input.action_release("select_right")
+		action = "select_right"
 	elif _arrow_rect(false).has_point(pos):
-		Input.action_press("select_left")
-		await get_tree().process_frame
-		Input.action_release("select_left")
+		action = "select_left"
+	if action.is_empty():
+		return false
+	_tap_action(action)
+	return true
+
+
+## Ein kurzer Druck auf eine Action - gedrueckt fuer genau ein Bild.
+func _tap_action(action: String) -> void:
+	Input.action_press(action)
+	await get_tree().process_frame
+	Input.action_release(action)
 
 
 # --- Darstellung -------------------------------------------------------------

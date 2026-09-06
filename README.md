@@ -126,7 +126,9 @@ möchte, ändert eine Zeile: `PINK_CAR_NAME` in `scripts/car_data.gd`.
 ## Admin-Panel
 
 Dreimal in die **obere rechte Ecke** tippen (innerhalb von zwei Sekunden)
-oeffnet ein verstecktes Panel mit sechs Schaltern:
+oeffnet ein verstecktes Panel mit sechs Schaltern. Die Flaeche ist ein Quadrat
+von 13 Prozent der kuerzeren Bildschirmseite, also die aeusserste obere rechte
+Ecke des Spielfelds - dort, wo auch die Bildratenanzeige steht.
 
 | Schalter | Wirkung |
 |---|---|
