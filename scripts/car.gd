@@ -5,6 +5,12 @@ extends VehicleBody3D
 ## VehicleWheel3D-Knoten; Motor, Lenkung, Abtrieb und Luftwiderstand
 ## werden hier simuliert.
 
+## In Godot 4 treibt eine positive engine_force ein VehicleBody3D nach +Z.
+## Die Fahrzeuge hier schauen nach -Z (Vorderachse bei negativem z), deshalb
+## ist Vorwaerts das negative Vorzeichen. Ohne das faehrt das Auto rueckwaerts
+## und damit die Strecke verkehrt herum.
+const DRIVE_SIGN := -1.0
+
 const IDLE_RPM := 900.0
 
 var spec: Dictionary = {}
@@ -185,10 +191,11 @@ func _update_drivetrain(speed: float) -> void:
 
 	var reversing := forward_speed < 0.6 and brake_input > 0.1 and throttle_input < 0.1
 	if reversing:
-		engine_force = -power * 0.42 * brake_input
+		engine_force = -DRIVE_SIGN * power * 0.42 * brake_input
 		brake = 0.0
 	else:
-		engine_force = power * torque * throttle_input * speed_limit * grip_multiplier
+		engine_force = DRIVE_SIGN * power * torque * throttle_input * speed_limit \
+			* grip_multiplier
 		brake = spec["brake_force"] * brake_input
 		if Input.is_action_pressed("handbrake"):
 			brake = spec["brake_force"] * 1.4

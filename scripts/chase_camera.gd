@@ -31,7 +31,11 @@ func next_mode() -> String:
 
 
 func _physics_process(delta: float) -> void:
-	if target == null or not is_instance_valid(target):
+	# Beim Szenenwechsel laeuft noch ein Physikschritt, waehrend der Knoten
+	# schon aus dem Baum genommen ist. `look_at` wirft dann einen Fehler.
+	if not is_inside_tree() or target == null or not is_instance_valid(target):
+		return
+	if not target.is_inside_tree():
 		return
 	var basis := target.global_transform.basis
 	var origin := target.global_transform.origin

@@ -36,6 +36,10 @@ func _ready() -> void:
 	generator.mix_rate = SAMPLE_RATE
 	generator.buffer_length = 0.12
 	stream = generator
+	# Ein AudioStreamGenerator kann nicht als Sample abgespielt werden. Im
+	# Browser waehlt Godot sonst genau das und meldet
+	# "trying to play a sample from a stream that cannot be sampled".
+	playback_type = AudioServer.PLAYBACK_TYPE_STREAM
 	play()
 	_playback = get_stream_playback() as AudioStreamGeneratorPlayback
 

@@ -53,7 +53,8 @@ static func race() -> WorldEnvironment:
 	env.ssr_fade_out = 3.0
 	env.ssr_depth_tolerance = 0.3
 
-	env.glow_enabled = true
+	# Glow ist im Kompatibilitaetsmodus eine teure Vollbildunschaerfe.
+	env.glow_enabled = not OS.has_feature("web")
 	env.glow_intensity = 0.5
 	env.glow_bloom = 0.12
 	env.glow_hdr_threshold = 1.05
@@ -146,6 +147,11 @@ static func sun() -> DirectionalLight3D:
 	light.shadow_blur = 1.1
 	light.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
 	light.directional_shadow_max_distance = 260.0
+	if OS.has_feature("web"):
+		# WebGL2 haelt vier Kaskaden ueber 260 m nicht durch.
+		light.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+		light.directional_shadow_max_distance = 110.0
+		light.light_angular_distance = 0.0
 	light.directional_shadow_split_1 = 0.06
 	light.directional_shadow_split_2 = 0.16
 	light.directional_shadow_split_3 = 0.42
