@@ -57,10 +57,18 @@ func _build() -> void:
 
 	# --- Tacho unten rechts -------------------------------------------------
 	var panel := Control.new()
-	panel.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	panel.position = Vector2(-330, -250)
-	panel.size = Vector2(300, 220)
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.offset_left = -330.0
+	panel.offset_right = -30.0
+	if Device.uses_touch():
+		# Unten rechts liegen dort die Pedale - der Tacho wandert nach oben.
+		panel.set_anchors_preset(Control.PRESET_TOP_RIGHT, true)
+		panel.offset_top = 84.0
+		panel.offset_bottom = 304.0
+	else:
+		panel.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT, true)
+		panel.offset_top = -250.0
+		panel.offset_bottom = -30.0
 	root.add_child(panel)
 
 	_gauge = RevGauge.new()

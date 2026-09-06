@@ -55,6 +55,29 @@ wie bisher. Von den 43 MB ist fast alles die Godot-Laufzeit; die Spieldaten
 sind 92 KB, weil Modelle, Texturen und Sound erst beim Start berechnet
 werden.
 
+## Geraetewahl beim Start
+
+Beim ersten Start fragt das Spiel, womit gespielt wird: **Handy**, **iPad**
+oder **MacBook**. Die Wahl bestimmt zweierlei und wird gespeichert; in der
+Garage fuehrt `Esc` beziehungsweise der Knopf `GERAET` zurueck zur Auswahl.
+
+| | Handy | iPad | MacBook |
+|---|---|---|---|
+| Steuerung | Lenkrad und Pedale | Lenkrad und Pedale | Tastatur |
+| 3D-Aufloesung | 60 % | 75 % | voll |
+| Sonnenschatten | aus | 80 m | 160 m |
+| Kulisse am Rand | 35 % | 70 % | voll |
+
+**Lenkrad und Pedale sind stufenlos.** Das Lenkrad wird mit dem Finger
+gedreht; sein Drehwinkel ist der Einschlag, und losgelassen laeuft es von
+selbst in die Mitte zurueck. Die Pedale reagieren auf den Weg: weiter unten
+gedrueckt heisst weiter durchgetreten. Der Balken neben dem Pedal zeigt, wie
+weit. Beides laeuft ueber `Input.action_press(aktion, staerke)` in dieselben
+Actions wie die Tastatur - `car.gd` unterscheidet die Eingabearten nicht.
+
+Lenken und Gasgeben gleichzeitig funktioniert, weil jeder Finger einzeln
+verfolgt wird.
+
 ## Steuerung
 
 | Aktion | Tastatur | Gamepad |

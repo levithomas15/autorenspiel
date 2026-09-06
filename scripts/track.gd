@@ -285,7 +285,8 @@ func _scatter_trees() -> void:
 	var steps := _samples.size()
 	for i in range(0, steps, 2):
 		for side: float in [-1.0, 1.0]:
-			if rng.randf() > 0.55:
+			# Auf schwaecheren Geraeten steht weniger Kulisse am Rand.
+			if rng.randf() > 0.55 * Device.scenery_density():
 				continue
 			var lateral: float = side * rng.randf_range(HALF_WIDTH + 16.0,
 				HALF_WIDTH + VERGE_WIDTH - 6.0)
