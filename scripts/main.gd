@@ -2,14 +2,16 @@ extends Node3D
 
 ## Einstiegspunkt: legt die Eingaben an und wechselt zwischen Garage und Rennen.
 
-enum State { GARAGE, RACE }
+enum State { DEVICE, GARAGE, RACE }
 
 const LAPS_TOTAL := 5
 const COUNTDOWN := 3.6
 
-var state: int = State.GARAGE
+var state: int = State.DEVICE
 var selected_index: int = 0
 
+var _device_select: DeviceSelect = null
+var _touch: TouchControls = null
 var _garage: Garage = null
 var _track: Track = null
 var _car: Car = null
@@ -36,7 +38,12 @@ var _diag_label: Label = null
 func _ready() -> void:
 	_setup_input()
 	_build_diagnostics()
-	_enter_garage()
+	# Eine frueher getroffene Wahl wird uebernommen; sonst erst fragen.
+	if Device.load_saved():
+		Device.apply_to(get_viewport())
+		_enter_garage()
+	else:
+		_enter_device_select()
 
 
 func _build_diagnostics() -> void:
@@ -121,17 +128,34 @@ func _setup_input() -> void:
 
 # --- Zustandswechsel --------------------------------------------------------
 func _clear_scene() -> void:
+	if _touch != null:
+		_touch.release_all()
 	for child in get_children():
 		# Die Diagnoseanzeige bleibt ueber den Szenenwechsel hinweg stehen.
 		if child == _diag_layer:
 			continue
 		remove_child(child)
 		child.queue_free()
+	_device_select = null
+	_touch = null
 	_garage = null
 	_track = null
 	_car = null
 	_camera = null
 	_hud = null
+
+
+func _enter_device_select() -> void:
+	_clear_scene()
+	state = State.DEVICE
+	_device_select = DeviceSelect.new()
+	_device_select.chosen.connect(_on_device_chosen)
+	add_child(_device_select)
+
+
+func _on_device_chosen(_kind: int) -> void:
+	Device.apply_to(get_viewport())
+	_enter_garage()
 
 
 func _enter_garage() -> void:
@@ -141,6 +165,26 @@ func _enter_garage() -> void:
 	_garage.index = selected_index
 	_garage.car_chosen.connect(_on_car_chosen)
 	add_child(_garage)
+	_add_touch_controls(false)
+
+
+## Lenkrad und Pedale gibt es nur, wo keine Tastatur zu erwarten ist.
+func _add_touch_controls(racing: bool) -> void:
+	if not Device.uses_touch():
+		return
+	_touch = TouchControls.new()
+	_touch.racing = racing
+	if racing:
+		_touch.garage_requested.connect(_enter_garage)
+		_touch.camera_requested.connect(_cycle_camera)
+	else:
+		_touch.garage_requested.connect(_enter_device_select)
+	add_child(_touch)
+
+
+func _cycle_camera() -> void:
+	if _camera != null and _hud != null:
+		_hud.show_message(_camera.next_mode(), 1.2)
 
 
 func _on_car_chosen(index: int) -> void:
@@ -172,6 +216,7 @@ func _start_race() -> void:
 
 	_hud = Hud.new()
 	add_child(_hud)
+	_add_touch_controls(true)
 	_hud.set_car_name(spec["name"])
 
 	_lap = 1
@@ -186,9 +231,12 @@ func _start_race() -> void:
 # --- Ablauf -----------------------------------------------------------------
 func _process(delta: float) -> void:
 	_update_diagnostics()
+	if state == State.DEVICE:
+		return
 	if state == State.GARAGE:
+		# Zurueck fuehrt zur Geraetewahl, damit sie sich aendern laesst.
 		if Input.is_action_just_pressed("back"):
-			get_tree().quit()
+			_enter_device_select()
 		return
 	_process_race(delta)
 
@@ -201,7 +249,7 @@ func _process_race(delta: float) -> void:
 		_enter_garage()
 		return
 	if Input.is_action_just_pressed("camera"):
-		_hud.show_message(_camera.next_mode(), 1.2)
+		_cycle_camera()
 	if Input.is_action_just_pressed("lights"):
 		_car.toggle_headlights()
 	if Input.is_action_just_pressed("reset"):
